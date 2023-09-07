@@ -15,3 +15,46 @@ def deps do
   ]
 end
 ```
+
+## Examples
+
+### :httpc
+
+Without `ExSslOptions`, we get a warning message:
+
+```elixir
+iex(1)> :httpc.request(:get, {"https://www.erlang.org", []}, [], [])
+
+11:41:32.245 [warning] Description: 'Authenticity is not established by certificate path validation'
+     Reason: 'Option {verify, verify_peer} and cacertfile/cacerts is missing'
+
+{:ok, ...}
+```
+
+With `ExSslOptions`, no warning message since certificates verification is configured:
+```elixir
+iex(1)> :httpc.request(:get, {"https://www.erlang.org", []}, [ssl: ExSslOptions.eef_options()], [])
+{:ok, ...}
+```
+
+### :hackney
+
+```elixir
+iex(1)> :hackney.request(:get, "https://www.erlang.org/", [], <<>>, [ssl_options: ExSslOptions.eef_options()])
+```
+
+### RabbitMQ
+
+```elixir
+Broadway.start_link(__MODULE__,
+  ...
+  producer: [
+    module: {BroadwayRabbitMQ.Producer,
+       ...,
+       connection: [ssl_options: ExSslOptions.eef_options()], 
+       ...
+    }
+  ]
+  ...
+)
+```
