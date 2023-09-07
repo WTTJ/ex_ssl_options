@@ -1,5 +1,5 @@
 defmodule ExSslOptionsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest ExSslOptions
 
   test "greets the world" do
