@@ -1,11 +1,12 @@
 # ExSslOptions
 
-**TODO: Add description**
+`ExSslOptions` provides default SSL configurations. 
+
+They can be used with modules relying on ssl options like `:ssl` or `:hackney`.
+
+Current version provides a configuration based on [EEF Security WG recommandations](https://github.com/erlef/security-wg/blob/master/docs/secure_coding_and_deployment_hardening/ssl.md).
 
 ## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ex_ssl_options` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -14,8 +15,3 @@ def deps do
   ]
 end
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/ex_ssl_options>.
-
