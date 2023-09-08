@@ -4,6 +4,20 @@ defmodule ExSslOptions do
   """
 
   @doc """
+  Very simple SSL configuration
+  """
+  def basic_options() do
+    [
+      verify: :verify_peer,
+      depth: 5,
+      cacerts: :certifi.cacerts(),
+      customize_hostname_check: [
+        {:match_fun, :public_key.pkix_verify_hostname_match_fun(:https)}
+      ]
+    ]
+  end
+
+  @doc """
   SSL options according to [EEF Security WG recommandations](https://github.com/erlef/security-wg/blob/master/docs/secure_coding_and_deployment_hardening/ssl.md).
   """
   def eef_options do
