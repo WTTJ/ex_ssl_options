@@ -4,7 +4,9 @@
 
 They can be used with modules relying on ssl options like `:ssl` or `:hackney`.
 
-Current version provides a configuration based on [EEF Security WG recommandations](https://github.com/erlef/security-wg/blob/master/docs/secure_coding_and_deployment_hardening/ssl.md).
+Current version provides:
+- a basic configuration: `ExSslOptions.basic_options()`
+- a configuration based on [EEF Security WG recommandations](https://github.com/erlef/security-wg/blob/master/docs/secure_coding_and_deployment_hardening/ssl.md): `ExSslOptions.eef_options()`
 
 ## Installation
 
