@@ -19,7 +19,9 @@ defmodule ExSslOptions.MixProject do
         quality: :test
       ],
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      description: "A simple lib to define right SSL options",
+      package: package()
     ]
   end
 
@@ -38,7 +40,8 @@ defmodule ExSslOptions.MixProject do
       # Dev deps
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 
@@ -51,6 +54,16 @@ defmodule ExSslOptions.MixProject do
         "test --cover",
         "dialyzer"
       ]
+    ]
+  end
+
+  defp package() do
+    [
+      maintainers: ["David Julien"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/WTTJ/ex_ssl_options"
+      }
     ]
   end
 end
