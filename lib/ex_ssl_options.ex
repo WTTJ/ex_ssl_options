@@ -6,7 +6,7 @@ defmodule ExSslOptions do
   @doc """
   Very simple SSL configuration
   """
-  def basic_options() do
+  def basic_options do
     [
       verify: :verify_peer,
       depth: 5,
