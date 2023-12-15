@@ -1,0 +1,210 @@
+defaults: &defaults
+  working_directory: /home/circleci/ex_ssl_options
+
+version: 2.1
+
+parameters:
+  registry:
+    type: string
+    default: "924484830305.dkr.ecr.eu-west-1.amazonaws.com"
+  elixir_base_image:
+    type: string
+    default: "924484830305.dkr.ecr.us-east-1.amazonaws.com/circleci-elixir:v1.15.7-erlang-26.1.2"
+  cache_version:
+    type: string
+    default: "1"
+  language_version:
+    type: string
+    default: "erlang-26.1.2_elixir-1.15.7"
+
+jobs:
+  checkout_and_deps:
+    <<: *defaults
+    docker:
+      - image: << pipeline.parameters.elixir_base_image >>
+    steps:
+      - checkout
+      - save_cache:
+          key: v<< pipeline.parameters.cache_version >>-ex_ssl_options-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - /home/circleci/ex_ssl_options
+      - add_ssh_keys:
+          fingerprints:
+            - "e7:be:eb:14:65:31:e9:d8:b6:08:3f:58:36:54:5b:f0"
+      - run: ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
+          name: install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-deps-cache-{{ checksum "mix.lock" }}
+      - run:
+          name: gather dependencies
+          command: mix deps.get
+      - save_cache:
+          key: v<< pipeline.parameters.cache_version >>-deps-cache-{{ checksum "mix.lock" }}
+          paths:
+            - deps
+  compile_test:
+    <<: *defaults
+    docker:
+      - image: << pipeline.parameters.elixir_base_image >>
+        environment:
+          MIX_ENV: test
+    steps:
+      - run:
+          name: Install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-ex_ssl_options-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          keys:
+            - v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}-{{ .Environment.CIRCLE_SHA1 }}
+            - v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}-{{ .Branch }}
+            - v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}
+            - v<< pipeline.parameters.cache_version >>-deps-cache-{{ checksum "mix.lock" }}
+      - run:
+          name: compile deps for test
+          command: mix deps.compile
+      - run:
+          name: compile test
+          command: mix compile
+      - save_cache:
+          key: v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - _build/test
+            - deps
+      - save_cache:
+          key: v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}-{{ .Branch }}
+          paths:
+            - _build/test
+            - deps
+      - save_cache:
+          key: v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}
+          paths:
+            - _build/test
+            - deps
+  vulnerabilities_mix:
+    <<: *defaults
+    docker:
+      - image: << pipeline.parameters.elixir_base_image >>
+        environment:
+          MIX_ENV: test
+    steps:
+      - run:
+          name: install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-ex_ssl_options-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Run mix audit
+          command: mix deps.audit --format human
+  code_analysis:
+    <<: *defaults
+    docker:
+      - image: << pipeline.parameters.elixir_base_image >>
+        environment:
+          MIX_ENV: test
+    steps:
+      - run:
+          name: install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-ex_ssl_options-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Run mix format
+          command: mix format --check-formatted
+      - run:
+          name: Run credo
+          command: mix credo --strict
+
+  code_analysis_dialyzer:
+    <<: *defaults
+    docker:
+      - image: << pipeline.parameters.elixir_base_image >>
+        environment:
+          MIX_ENV: test
+    resource_class: small
+    steps:
+      - run:
+          name: install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-ex_ssl_options-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          keys:
+            - plt-cache-<< pipeline.parameters.language_version >>-{{ checksum "mix.lock" }}-{{ .Branch }}
+            - plt-cache-<< pipeline.parameters.language_version >>-{{ checksum "mix.lock" }}
+            - plt-cache-<< pipeline.parameters.language_version >>
+      - run:
+          name: Run dialyzer
+          command: mix dialyzer
+      - save_cache:
+          key: plt-cache-<< pipeline.parameters.language_version >>-{{ checksum "mix.lock" }}-{{ .Branch }}
+          paths:
+            - _build/test/dialyxir_<< pipeline.parameters.language_version >>_deps-test.plt
+      - save_cache:
+          key: plt-cache-<< pipeline.parameters.language_version >>-{{ checksum "mix.lock" }}
+          paths:
+            - _build/test/dialyxir_<< pipeline.parameters.language_version >>_deps-test.plt
+      - save_cache:
+          key: plt-cache-<< pipeline.parameters.language_version >>
+          paths:
+            - _build/test/dialyxir_<< pipeline.parameters.language_version >>_deps-test.plt
+
+  test:
+    <<: *defaults
+    docker:
+      - image: << pipeline.parameters.elixir_base_image >>
+        environment:
+          MIX_ENV: test
+    resource_class: small
+    steps:
+      - run:
+          name: Install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-ex_ssl_options-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v<< pipeline.parameters.cache_version >>-test-cache-{{ checksum "mix.lock" }}-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Launch tests
+          command: mix test
+
+workflows:
+  version: 2
+  btd:
+    jobs:
+      - checkout_and_deps:
+          context:
+            - aws
+      - compile_test:
+          context:
+            - aws
+          requires:
+            - checkout_and_deps
+      - test:
+          context:
+            - aws
+          requires:
+            - compile_test
+      - vulnerabilities_mix:
+          context:
+            - aws
+          requires:
+            - compile_test
+      - code_analysis:
+          context:
+            - aws
+          requires:
+            - compile_test
+      - code_analysis_dialyzer:
+          context:
+            - aws
+          requires:
+            - compile_test
