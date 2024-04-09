@@ -13,12 +13,16 @@ defmodule ExSslOptions.MixProject do
       dialyzer: [
         flags: [:unmatched_returns, :error_handling, :unknown, :extra_return],
         list_unused_filters: true,
-        plt_add_apps: []
+        plt_add_apps: [],
+        plt_local_path: "_build/plts/local",
+        plt_core_path: "_build/plts/core"
       ],
       preferred_cli_env: [
-        quality: :test
+        quality: :test,
+        "coveralls.html": :test
       ],
       deps: deps(),
+      test_coverage: [tool: ExCoveralls],
       aliases: aliases(),
       description: "A simple lib to define right SSL options",
       package: package()
@@ -41,7 +45,9 @@ defmodule ExSslOptions.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.18", only: :test},
+      {:junit_formatter, "~> 3.4", only: [:test]}
     ]
   end
 
@@ -51,8 +57,8 @@ defmodule ExSslOptions.MixProject do
         "format",
         "credo --strict",
         "deps.audit --format human",
-        "test --cover",
-        "dialyzer"
+        "dialyzer",
+        "coveralls.html"
       ]
     ]
   end
