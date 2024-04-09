@@ -4,7 +4,7 @@ defmodule ExSslOptions.MixProject do
   def project do
     [
       app: :ex_ssl_options,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       elixirc_options: [

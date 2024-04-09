@@ -13,7 +13,7 @@ Current version provides:
 ```elixir
 def deps do
   [
-    {:ex_ssl_options, "~> 0.1.0"}
+    {:ex_ssl_options, "~> 0.1"}
   ]
 end
 ```
