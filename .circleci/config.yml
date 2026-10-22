@@ -104,29 +104,9 @@ jobs:
             - v<< pipeline.parameters.cache_version >>-test-{{ checksum "mix.lock" }}
       - run:
           name: Launch tests
-          command: mkdir -p coveralls && mix coveralls | tee coveralls/output
+          command: mix coveralls
       - store_test_results:
           path: _build/test/lib/ex_ssl_options/test-junit-report.xml
-      - persist_to_workspace:
-          root: coveralls
-          paths:
-            - output
- 
-  coverage:
-    docker:
-      - image: 924484830305.dkr.ecr.eu-west-1.amazonaws.com/coverage:main-latest
-        environment:
-          AWS_S3_BUCKET: welcome-releases
-          AWS_S3_FOLDER: data/coverage
-          COVERAGE_PARSER: coveralls
-          COVERAGE_VARIATION_THRESHOLD: 0.3
-    steps:
-      - attach_workspace:
-          at: /tmp/coveralls
-      - run:
-          name: Upload coverage and comment PR
-          command: /app/bin/coverage eval 'Coverage.run("/tmp/coveralls/output")'
-
 
 workflows:
   version: 2
@@ -150,10 +130,4 @@ workflows:
             - aws
           requires:
             - prepare
-      - coverage:
-          context:
-            - aws
-            - coverage
-          requires:
-            - test
  
