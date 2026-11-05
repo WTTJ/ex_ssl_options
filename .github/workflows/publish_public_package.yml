@@ -10,24 +10,24 @@ jobs:
     if: "!github.event.release.prerelease"
 
     steps:
-    - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
 
-    - name: Set up Elixir
-      uses: erlef/setup-beam@v1
-      with:
-        elixir-version: '1.17.2'
-        otp-version: '26.2.5.2'
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "v1.20.5"
+          otp-version: "29.1.2"
 
-    - name: Install dependencies
-      run: |
-        mix deps.get
+      - name: Install dependencies
+        run: |
+          mix deps.get
 
-    - name: Compile
-      run: |
-        mix compile
+      - name: Compile
+        run: |
+          mix compile
 
-    - name: Check version consistency
-      run: |
+      - name: Check version consistency
+        run: |
           MIX_VERSION=$(mix run -e 'IO.puts Mix.Project.config[:version]')
           RELEASE_VERSION=${{ github.event.release.tag_name }}
           RELEASE_VERSION=${RELEASE_VERSION#v}
@@ -37,8 +37,8 @@ jobs:
             exit 1
           fi
 
-    - name: Publish to Hex.pm
-      env:
-        HEX_API_KEY: ${{ secrets.HEXPM_PUBLIC_PACKAGES_KEY }}
-      run: |
-        mix hex.publish --yes
+      - name: Publish to Hex.pm
+        env:
+          HEX_API_KEY: ${{ secrets.HEXPM_PUBLIC_PACKAGES_KEY }}
+        run: |
+          mix hex.publish --yes
