@@ -46,7 +46,7 @@ defmodule ExSslOptions do
 
     # TLS curves: X25519, prime256v1, secp384r1
     preferred_eccs = [:secp256r1, :secp384r1]
-    eccs = :ssl.eccs() -- :ssl.eccs() -- preferred_eccs
+    eccs = :ssl.eccs() -- (:ssl.eccs() -- preferred_eccs)
 
     [
       verify: :verify_peer,

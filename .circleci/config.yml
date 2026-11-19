@@ -3,10 +3,10 @@ version: 2.1
 parameters:
   elixir_base_image:
     type: string
-    default: "924484830305.dkr.ecr.us-east-1.amazonaws.com/circleci-elixir:v1.16.2-erlang-26.2.3-debian-bookworm-20240130-slim"
+    default: "924484830305.dkr.ecr.us-east-1.amazonaws.com/circleci-elixir-1-20-erlang-29:v1.0.1"
   cache_version:
     type: string
-    default: "1"
+    default: "2"
 
 executors:
   elixir:
@@ -83,7 +83,7 @@ jobs:
             - v<< pipeline.parameters.cache_version >>-test-{{ checksum "mix.lock" }}
       - run:
           name: Run mix format
-          command: mix format --check-formatted
+          command: mix format --check-formatted --migrate
       - run:
           name: Run credo
           command: mix credo --strict
@@ -130,4 +130,3 @@ workflows:
             - aws
           requires:
             - prepare
- 

@@ -17,10 +17,6 @@ defmodule ExSslOptions.MixProject do
         plt_local_path: "_build/plts/local",
         plt_core_path: "_build/plts/core"
       ],
-      preferred_cli_env: [
-        quality: :test,
-        "coveralls.html": :test
-      ],
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
       aliases: aliases(),
@@ -29,10 +25,20 @@ defmodule ExSslOptions.MixProject do
     ]
   end
 
+  def cli do
+    [
+      preferred_envs: [
+        quality: :test,
+        dialyzer: :test,
+        "coveralls.html": :test
+      ]
+    ]
+  end
+
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :ssl, :public_key, :crypto]
+      extra_applications: [:logger, :ssl, :public_key, :crypto, :xmerl]
     ]
   end
 
@@ -54,7 +60,7 @@ defmodule ExSslOptions.MixProject do
   defp aliases() do
     [
       quality: [
-        "format",
+        "format --check-formatted --migrate",
         "credo --strict",
         "deps.audit --format human",
         "dialyzer",
