@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   elixir_base_image:
     type: string
-    default: "924484830305.dkr.ecr.us-east-1.amazonaws.com/circleci-elixir-1-20-erlang-29:v1.0.1"
+    default: "924484830305.dkr.ecr.us-east-1.amazonaws.com/circleci-elixir-1-20-erlang-29:v1.1.0"
   cache_version:
     type: string
     default: "2"
